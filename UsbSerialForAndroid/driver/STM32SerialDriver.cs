@@ -1,4 +1,4 @@
-﻿/* Copyright 2018 Tyler Technologies Inc.
+/* Copyright 2018 Tyler Technologies Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -81,8 +81,9 @@ namespace Hoho.Android.UsbSerial.Driver
 
 			public override void Open(UsbDeviceConnection connection)
 			{
-				if (mConnection != null)
-					throw new IOException("Already opened.");
+                if (mConnection != null) {
+                    throw new IOException("Already opened.");
+                }
 
 				mConnection = connection;
 				bool opened = false;
@@ -94,42 +95,48 @@ namespace Hoho.Android.UsbSerial.Driver
 						mControlInterface = mDevice.GetInterface(i);
 						if(mControlInterface.InterfaceClass == UsbClass.Comm)
 						{
-							if (!mConnection.ClaimInterface(mControlInterface, true))
-								throw new IOException("Could not claim control interface");
+                            if (!mConnection.ClaimInterface(mControlInterface, true)) {
+                                throw new IOException("Could not claim control interface");
+                            }
 							(Driver as STM32SerialDriver).mCtrlInterf = i;
 							controlInterfaceFound = true;
 							break;
 						}
 					}
-					if (!controlInterfaceFound)
-						throw new IOException("Could not claim control interface");
+                    if (!controlInterfaceFound) {
+                        throw new IOException("Could not claim control interface");
+                    }
 					for (var i = 0; i < mDevice.InterfaceCount; i++)
 					{
 						mDataInterface = mDevice.GetInterface(i);
 						if(mDataInterface.InterfaceClass == UsbClass.CdcData)
 						{
-							if (!mConnection.ClaimInterface(mDataInterface, true))
-								throw new IOException("Could not claim data interface");
+                            if (!mConnection.ClaimInterface(mDataInterface, true)) {
+                                throw new IOException("Could not claim data interface");
+                            }
 							mReadEndpoint = mDataInterface.GetEndpoint(1);
 							mWriteEndpoint = mDataInterface.GetEndpoint(0);
 							opened = true;
 							break;
 						}
 					}
-					if(!opened)
-						throw new IOException("Could not claim data interface.");
+                    if (!opened) {
+                        throw new IOException("Could not claim data interface.");
+                    }
 				}
 				finally
 				{
-					if (!opened)
-						mConnection = null;
+                    if (!opened) {
+                        mConnection = null;
+                    }
 				}
 			}
 
 			public override void Close()
 			{
-				if (mConnection == null)
-					throw new IOException("Already closed");
+                if (mConnection == null) {
+                    throw new IOException("Already closed");
+                }
 				mConnection.Close();
 				mConnection = null;
 			}
@@ -143,16 +150,19 @@ namespace Hoho.Android.UsbSerial.Driver
 					{
 						request.Initialize(mConnection, mReadEndpoint);
 						ByteBuffer buf = ByteBuffer.Wrap(dest);
-						if (!request.Queue(buf, dest.Length))
-							throw new IOException("Error queuing request");
+                        if (!request.Queue(buf, dest.Length)) {
+                            throw new IOException("Error queuing request");
+                        }
 
 						UsbRequest response = mConnection.RequestWait();
-						if (response == null)
-							throw new IOException("Null response");
+                        if (response == null) {
+                            throw new IOException("Null response");
+                        }
 
 						int nread = buf.Position();
-						if (nread > 0)
-							return nread;
+                        if (nread > 0) {
+                            return nread;
+                        }
 
 						return 0;
 					}
@@ -200,18 +210,19 @@ namespace Hoho.Android.UsbSerial.Driver
 						byte[] writeBuffer;
 
 						writeLength = Math.Min(src.Length - offset, mWriteBuffer.Length);
-						if (offset == 0)
-							writeBuffer = src;
-						else
-						{
-							Array.Copy(src, offset, mWriteBuffer, 0, writeLength);
-							writeBuffer = mWriteBuffer;
-						}
+                        if (offset == 0) {
+                            writeBuffer = src;
+                        }
+                        else {
+                            Array.Copy(src, offset, mWriteBuffer, 0, writeLength);
+                            writeBuffer = mWriteBuffer;
+                        }
 
 						amtWritten = mConnection.BulkTransfer(mWriteEndpoint, writeBuffer, writeLength, timeoutMillis);
 					}
-					if(amtWritten <= 0)
-						throw new IOException($"Error writing {writeLength} bytes at offset {offset} length={src.Length}");
+                    if (amtWritten <= 0) {
+                        throw new IOException($"Error writing {writeLength} bytes at offset {offset} length={src.Length}");
+                    }
 
 					Log.Debug(TAG, $"Wrote amt={amtWritten} attempted={writeLength}");
 					offset += amtWritten;

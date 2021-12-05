@@ -1,4 +1,4 @@
-﻿/* Copyright 2017 Tyler Technologies Inc.
+/* Copyright 2017 Tyler Technologies Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -95,8 +95,9 @@ namespace UsbSerialExampleApp
 
             // unregister the broadcast receivers
             var temp = detachedReceiver; // copy reference for thread safety
-            if (temp != null)
+            if (temp != null) {
                 UnregisterReceiver(temp);
+            }
         }
         internal static Task<IList<IUsbSerialDriver>> FindAllDriversAsync(UsbManager usbManager)
         {
@@ -148,8 +149,9 @@ namespace UsbSerialExampleApp
             {
                 var ports = driver.Ports;
                 Log.Info(TAG, string.Format("+ {0}: {1} port{2}", driver, ports.Count, ports.Count == 1 ? string.Empty : "s"));
-                foreach (var port in ports)
+                foreach (var port in ports) {
                     adapter.Add(port);
+                }
             }
 
             adapter.NotifyDataSetChanged();
